@@ -1,4 +1,4 @@
-# Initial plots and example statistics for metabarcoding data  
+# Initial NMDS ordinations and example diversity statistics for metabarcoding data  
 ## This workflow and Jupyter binder shows a basic workflow to visualize metabarcoding data in R.  
 ### Authors:  
 ### Jason Rothman
