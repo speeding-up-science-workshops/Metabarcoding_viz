@@ -1,4 +1,3 @@
-install.packages("ggplot2")
-install.packages("rmarkdown")
-install.packages("vegan")
-install.packages("RColorBrewer")
+pkgs = c("ggplot2", "rmarkdown", "vegan", "RColorBrewer")
+ncores = parallel:detectCores()
+install.packages(pkgs, Ncpus = ncores)
