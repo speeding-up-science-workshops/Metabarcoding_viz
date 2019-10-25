@@ -1,0 +1,229 @@
+---
+title: "NMDS Visualization of Metabarcoding Data"
+author: "Jason Rothman and Jane Lucas"
+output: html_document
+---
+  
+##### This is where the workflow starts to generate NMDS plots and run a basic Adonis PERMANOVA with the Tara Oceans microbiome data set.
+##### The data can be downloaded from http://ocean-microbiome.embl.de/companion.html.
+##### We have included a mapping file with relevent metadata, and an OTU table.  
+##### First, load the R packages "vegan," "ggplot2," and "RColorBrewer."
+  
+```{r}
+library(ggplot2)
+library(vegan)
+library(RColorBrewer)
+```
+##### You need to decide how you would like to graph your data. In this example we'll make an NMDS ordination.
+##### Before plotting, you need to decide how will you handle your data (i.e. rarefy, square root transform, etc.)
+##### In this example, we'll square root transform the data.
+
+##### Now, import your OTU table in CSV formatting into R.  
+##### Make sure you do not have any taxonomy data in this file.
+```{r}
+OTUMatrix_Original <- read.csv("otu.csv", header = TRUE)
+```
+##### You can view the contents of an R object with str(). The brackets [] indicate how much of the object to see.
+```{r}
+str(OTUMatrix_Original[1:5])
+```
+##### Remove first column because it is OTU names.
+```{r}
+test2 <- OTUMatrix_Original[,-1]
+str(test2[1:5])
+```
+##### Create a squareroot transformed matrix.
+```{r}
+sqrt_OTUmatrix_bact <-  sqrt(test2)
+```
+##### Now transpose the data so that samples are Rows and not Columns. Otherwise the results from downstream analyses will be incorrect.
+```{r}
+OTU_Matrix<-t(sqrt_OTUmatrix_bact)
+```
+##### Now, create the NMS object using the Bray-Curtis dissimilarity method.
+##### You can also use other dissimilarity methods here too.
+##### If you want to see how adding or subtracting dimensions affects your results, change k = )
+```{r}
+ 
+Bact_NMS_data<-metaMDS(OTU_Matrix,distance = "bray", k=2,try=100,autotransform = TRUE,maxit=1000)
+
+#Data are square root transformed, and then rescaled ("Wisconsin rescaling").
+```
+##### You can plot the stress of the NMDS here as a "Shepard plot". This shows how well the originial dissimilarities are kept with the reduced number of dimensions that you used.  
+##### You want as little scatter around the line as possible. 
+```{r}
+stressplot(Bact_NMS_data)
+```
+
+##### Now, create vectors with the NMS attributes to be able plot the data.
+```{r}
+NMS_coordinates<-scores(Bact_NMS_data,display="sites")
+Bact_NMS_axes<-as.data.frame(NMS_coordinates)
+NMS_OTUscores<-scores(Bact_NMS_data,display="species")
+
+#In case you'd like to have the NMS coordinates, write them to a file:
+write.csv(Bact_NMS_axes,"Bact_NMS_axes.csv")
+```
+##### Load your Mapping File, this should have all of the descriptions and categories of data.
+```{r}
+Mapping_File <- read.csv("Tara_oceans_mapping_file.csv")
+str(Mapping_File[1:4])
+attach(Mapping_File)
+depth = as.factor(Depth)
+```
+
+##### Now create a dataframe with NMS Coordinates and Mapping File information.  
+##### Add the proportion of total sequences of each vector to the "for_plotting" object below.
+```{r}
+for_ploting<-as.data.frame(cbind(NMS_coordinates,Mapping_File))
+str(for_ploting[1:5])
+```
+##### Now you can plot the data with vegan. This is black and white and uses shape to show the different categories.
+
+ ```{r}
+#If you'd like to save the file, use this line of code: png(file="Bact_NMS_black_small.png", width = 6000, height = 4800, res = 1200)
+par(mar=c(4,4,1,1))
+plot(for_ploting$NMDS2 ~ for_ploting$NMDS1,
+     xlab = "NMS1",
+     ylab = "NMS2",
+     font=2,
+     font.lab=2,
+     cex.axis=1,
+     pch = c(0, 1,2,3)[as.factor(Mapping_File$Depth)], cex=.8,  # Different 'pch' types change the shape of each point 
+     data = for_ploting)
+ordiellipse(Bact_NMS_data, group=Mapping_File$Depth,kind = "se", 
+            conf=0.95, lwd=1.9, lty= c(0,1,2,3)) #This adds 95% confidence intervals around the centroid of each category of data.
+# Add a legend to the plot too.
+legend(
+  x ="bottomright",
+  legend = c("DCM","MES","Mix","SRF"), # For readability of legend
+  pch = c(0, 1, 2,3),
+  cex = .60 # Scale the legend to look attractively sized
+)
+```
+
+##### Now let's make the plot more colorful! It might be useful to have colorful figures too.
+```{r}
+#Use this line of code to save your plot: png(file="Bact_NMS_color.png", width = 6000, height = 4800, res = 1200)
+par(mar=c(4,4,1,1))
+plot(for_ploting$NMDS2 ~ for_ploting$NMDS1,
+     xlab = "NMS1",
+     ylab = "NMS2",
+     font=2,
+     font.lab=2,
+     cex.axis=1,
+     pch = c(0, 1, 2,3)[as.factor(Mapping_File$Depth)], cex=.8, 
+     col =c("black","saddlebrown","tan2","green1","green4")[as.factor(Mapping_File$Depth)], #col lets you define your colors. 
+     data = for_ploting)
+ordiellipse(Bact_NMS_data, group=Mapping_File$Depth,kind = "se", 
+            conf=0.95, lwd=1.9, col =c("black","saddlebrown","tan2","green1"))
+legend(
+  x ="bottomright",
+  legend = c("DCM","MES","Mix","SRF"), # for readability of legend
+  pch = c(0, 1, 2,3),
+  col =c("black","saddlebrown","tan2","green1"),
+  cex = .60 # scale the legend to look attractively sized
+)
+```
+
+##### There are many different ways to plot NMDS data.  
+##### You can use the R package "ggplot2" to customize your plots with colors and shapes, etc.  
+##### For example, you can use the default ggplot2 settings to make a nice basic plot:
+```{r}
+p1<-ggplot(for_ploting, aes(NMDS1, NMDS2, color = Depth)) +
+  geom_point()
+
+p1
+
+```
+
+##### You can also add some design to the plot so that it's a little easier to read.  
+##### The R package Rcolorbrewer has different color pallets than the default.
+```{r}
+p1<-ggplot(for_ploting, aes(NMDS1, NMDS2, color = Depth)) +
+  geom_point(color= "black", size = 2.5) + #this extra line of geom_point puts a black outline around the points.
+  geom_point(aes(color=Depth), size=1.5) + scale_color_brewer(palette = "Dark2")
+p1
+```
+
+##### You can also use shape to denote groups.
+```{r}
+
+ps1<-ggplot(for_ploting, aes(NMDS1, NMDS2, color = Depth, shape = Depth)) +
+  geom_point(color= "black", size = 2.5) + 
+  geom_point(aes(color=Depth), size=1.5) + scale_color_brewer(palette = "Dark2")
+ps1
+```
+
+##### Now you can remove the background so it's not distracting:
+```{r}
+p2<-p1 + theme_bw()
+p2
+```
+
+##### And you can remove the gridlines so they aren't distracting too.
+```{r}
+p3<-p2 + theme(panel.grid.major = element_blank(), 
+               panel.grid.minor = element_blank())
+p3
+```
+
+###### Next, we can add some 95% confidence interval ellipses around our data.
+```{r}
+p4<-p3 + stat_ellipse()
+p4
+```
+
+###### You can also make the axis labels easier to read by chaning the font face.
+```{r}
+p5<-p4 + theme(axis.title.x = element_text(face = "bold"), 
+               axis.title.y = element_text(face = "bold"), 
+               legend.title  = element_text(face = "bold"))
+p5
+```
+
+##### These are just examples of ways to plot your data. There are many resources online to customize and change your plots.  
+
+##### One useful statistical test to analyze the beta diversity of your data is with Adonis PERMANOVA.  
+##### You can add multiple factors, interactions, and nested data into the formula, but here we will just analyze one single factor.  
+##### First, we will make a Bray-Curtis dissimilarity matrix from the square-root transformed data from earlier:
+```{r}
+bray <- vegdist(OTU_Matrix, method = 'bray')
+```
+
+##### Then we will run Adonis on the resulting matrix:
+```{r}
+adonis(bray~Depth, data = Mapping_File, permutations = 999)
+```
+
+##### We can also analyze the alpha diversity of the data too. 
+##### In this case, we'll used the Shannon Index, but there are many other alpha diversity metrics that you can use.
+
+```{r}
+shannon<-diversity(OTU_Matrix, index = "shannon")
+shannon_ploting<-as.data.frame(cbind(shannon,Mapping_File))
+str(shannon_ploting[1:5])
+```
+##### We can see if there is a significant difference in alpha diversity with ANOVA
+```{r}
+shannon_aov<-aov(shannon~Depth, data = shannon_ploting)
+summary(shannon_aov)
+```
+##### We can also see which groups are different from each other with a Post Hoc comparison that adjusts for multiple comparisons.
+```{r}
+TukeyHSD(shannon_aov)
+```
+##### Now we can plot the data in a similar fashion as previously:
+```{r}
+p7<-ggplot(shannon_ploting, aes(x=Depth, y=shannon, fill=Depth)) + 
+  geom_boxplot(position = position_dodge()) + scale_fill_brewer(palette = "Dark2")
+p8<-p7 + theme_bw()
+p9<-p8 + theme(
+  panel.grid.major = element_blank(), 
+  panel.grid.minor = element_blank())
+p10<-p9 + ylab("Shannon Index") + xlab("Depth") +
+  theme(axis.title.x = element_text(face = "bold"), axis.title.y = element_text(face = "bold"), legend.title  = element_text(face = "bold"), axis.text.x = element_text(angle=45, hjust=1))
+p10
+```
+
+#### We hope this is useful to you and that this short workflow helps get you started on your microbiome data visualization!
