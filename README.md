@@ -5,7 +5,7 @@
 ### Click on the binder link, than click "knit" to make an html R Markdown. You may need to turn off your pop up blocker.  
 
 ### Example Output:  
-!(https://github.com/jasonarothman/Metabarcoding_viz/blob/master/NMDS.png)
+![Img](https://raw.githubusercontent.com/jasonarothman/Metabarcoding_viz/master/NMDS.png)
 
 
 ### Authors:  
