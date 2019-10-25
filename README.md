@@ -7,7 +7,10 @@
 #### Example Output:  
 ![Img](https://raw.githubusercontent.com/jasonarothman/Metabarcoding_viz/master/NMDS.png)  
 
-
+### Summary:  
+#### This workflow will generate several example NMDS ordinations from an OTU/ASV table.  
+#### Please remove taxonomic assignments before using this workflow.  
+#### This plot will provide a visual representation of a given sample’s community composition in relation to all other samples. These plots allow you to quickly visualize your metabarcoding community by any metadata grouping (categorical) factor you choose.
 
 ### Authors:  
 #### Jason Rothman
