@@ -23,4 +23,6 @@
 
 #### GitHub: https://github.com/jasonarothman/Metabarcoding_viz
 
-#### Binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jasonarothman/Metabarcoding_viz/master?filepath=rstudio)
+#### Binder: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jasonarothman/Metabarcoding_viz/master?filepath=rstudio)  
+
+### We hope this is helpful!
