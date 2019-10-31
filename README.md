@@ -1,6 +1,8 @@
 # Initial NMDS ordinations and example diversity statistics for metabarcoding data  
 #### This workflow and Jupyter binder shows a basic workflow to visualize metabarcoding data in R.  
 
+[![DOI](https://zenodo.org/badge/217588728.svg)](https://zenodo.org/badge/latestdoi/217588728)
+
 ### Quick Start:  
 #### Click on the binder link, than click "knit" to make an html R Markdown. You may need to turn off your pop up blocker.  
 
