@@ -1,2 +1,4 @@
-pkgs = c("ggplot2", "rmarkdown", "vegan", "RColorBrewer")
-install.packages(pkgs)
+install.packages("ggplot2")
+install.packages("rmarkdown")
+install.packages("vegan")
+install.packages("RColorBrewer")
